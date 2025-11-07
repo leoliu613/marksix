@@ -5,22 +5,22 @@ Analyze Mark Six inter-draw adjacency on a 5x10 board with optional 3x3 wrap (to
 
 Board mapping:
 - Numbers 1..49 arranged on 5 columns (1..10, 11..20, 21..30, 31..40, 41..50) and 10 rows bottom->top.
-- Number n â†’ (row=(n-1)%10+1, col=(n-1)//10+1)
+- Number n → (row=(n-1)%10+1, col=(n-1)//10+1)
 - Valid numbers are 1..49 (exclude 50 at (row=10,col=5)).
 
 Adjacency:
-- Chebyshev (king move) distance. Radius r âˆˆ {1,2}.
+- Chebyshev (king move) distance. Radius r ∈ {1,2}.
 - wrap=False: ordinary board clipped at edges.
-- wrap=True: torus (ç’°é�¢) distance using min(|Î”|, size-|Î”|) for rows (10) & columns (5).
-- exclude_center: remove seed numbers themselves from union (æŽ’é™¤ã€Œæ­£ä¸­ã€�).
+- wrap=True: torus (環面) distance using min(|Δ|, size-|Δ|) for rows (10) & columns (5).
+- exclude_center: remove seed numbers themselves from union (排除「正中」).
 
 Statistics:
-For each consecutive pair of draws (t-1 â†’ t):
+For each consecutive pair of draws (t-1 → t):
   1. Build union neighborhood U from previous draw's 7 numbers.
   2. Count hits = numbers of current draw contained in U.
   3. Hypergeometric baseline: drawing n=7 from N=49 with K=|U|.
      Expectation E = n*K/N, Var = n*(K/N)*(1-K/N)*((N-n)/(N-1)).
-  4. Aggregate totals â†’ z-score (è§€å¯Ÿå€¼èˆ‡ç�¨ç«‹éš¨æ©Ÿç›¸æ¯”æ˜¯å�¦é¡¯è‘—).
+  4. Aggregate totals → z-score (觀察值與獨立隨機相比是否顯著).
 
 Outputs:
 - Six configurations:
@@ -34,7 +34,7 @@ Outputs:
 - Theoretical average single-seed neighborhood size.
 
 Example:
-Print detailed stats for the pair 2025-10-23 â†’ 2025-10-25 (r<=2, both wrap and no-wrap).
+Print detailed stats for the pair 2025-10-23 → 2025-10-25 (r<=2, both wrap and no-wrap).
 
 Usage:
   python3 scripts/analyze_grid_adjacency.py lottery_result.json
@@ -154,7 +154,7 @@ def main(path: str = "lottery_result.json"):
     print(f"Loaded draws (excluding placeholder): {len(draws)}")
     if len(draws) < 2:
         return
-    print(f"Range: {draws[0]['date']} â†’ {draws[-1]['date']}")
+    print(f"Range: {draws[0]['date']} → {draws[-1]['date']}")
     configs = [
         ("no-wrap r<=2 include center", False, 2, False),
         ("no-wrap r<=2 exclude center", False, 2, True),
@@ -171,14 +171,14 @@ def main(path: str = "lottery_result.json"):
         print(f"theory_single_seed_size (avg)={S['theory_single_seed']:.2f}")
         print(f"hist_hits={S['hist_hits']}")
 
-    # Example 2025-10-23 â†’ 2025-10-25
+    # Example 2025-10-23 → 2025-10-25
     for i in range(1, len(draws)):
         if draws[i-1]["date"] == "2025-10-23" and draws[i]["date"] == "2025-10-25":
             prev = draws[i-1]["numbers"]; curr = draws[i]["numbers"]
             for wrap in (False, True):
                 ex = pair_stats(prev, curr, radius=2, wrap=wrap, exclude_center=False)
                 mode = "wrap" if wrap else "no-wrap"
-                print(f"\nExample 2025-10-23 â†’ 2025-10-25 (r<=2, {mode}, include center)")
+                print(f"\nExample 2025-10-23 → 2025-10-25 (r<=2, {mode}, include center)")
                 print(f"prev={prev}\ncurr={curr}")
                 print(f"|U|={ex['U_size']} ({100*ex['U_size']/POP_SIZE:.1f}%), hits={ex['hits']}, E={ex['exp']:.2f}")
             break
