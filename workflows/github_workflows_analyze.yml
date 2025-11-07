@@ -1,0 +1,25 @@
+name: Analyze adjacency
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run analysis
+        run: |
+          python3 scripts/analyze_grid_adjacency.py lottery_result.json | tee analysis_output.txt
+      - name: Upload analysis output
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-output
+          path: analysis_output.txt
